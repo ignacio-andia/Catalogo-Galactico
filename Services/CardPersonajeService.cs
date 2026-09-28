@@ -28,6 +28,7 @@ namespace CatalogoGalactico.Services
                 PersonajeId = DTO.PersonajeId,
                 poder = DTO.poder,
                 HabilidadEspecial = DTO.HabilidadEspecial,
+                Arma = DTO.Arma,
                 NivelDePeligrosidad = DTO.NivelDePeligrosidad,
                 ImegenURL = DTO.ImegenURL
             };
@@ -48,6 +49,7 @@ namespace CatalogoGalactico.Services
             Card.PersonajeId = DTO.PersonajeId;
             Card.poder = DTO.poder;
             Card.HabilidadEspecial = DTO.HabilidadEspecial;
+            Card.Arma = DTO.Arma;
             Card.NivelDePeligrosidad = DTO.NivelDePeligrosidad;
             Card.ImegenURL = DTO.ImegenURL;
 
