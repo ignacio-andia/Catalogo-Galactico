@@ -9,5 +9,7 @@
         public string Afiliacion { get; set; } = string.Empty;
         public EstadoPersonaje Estado { get; set; }
         public bool FuerzaSensitiva { get; set; }
+
+        public record CrearPersonajeDTO(string Nombre, string Especie, Faccion Faccion, string Afiliacion, EstadoPersonaje Estado, bool FuerzaSensitiva);
     }
 }

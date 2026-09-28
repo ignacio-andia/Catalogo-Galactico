@@ -14,5 +14,7 @@ namespace CatalogoGalactico.Models
         public List<int> Participantes { get; set; } = new List<int>();
         public string Resultado { get; set; } = string.Empty;
 
+        public record CrearEventoDTO(string Nombre, int fecha, string Ubicacion, string Descripcion, List<int> Participantes, string Resultado);
+
     }
 }

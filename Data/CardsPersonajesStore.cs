@@ -2,9 +2,9 @@
 
 namespace CatalogoGalactico.Data
 {
-    public static class CardPersonajesStore
+    public static class CardsPersonajesStore
     {
-        public static List<CardsPersonaje> CardsPersonajes { get; } = new List<CardsPersonaje>()
+        public static List<CardsPersonaje> cardsPersonajes { get; } = new List<CardsPersonaje>()
         {
             new CardsPersonaje(){Id = 1, PersonajeId = 1, poder = 90, HabilidadEspecial = "Control de la Fuerza", NivelDePeligrosidad = 8, ImegenURL = "https://upload.wikimedia.org/wikipedia/en/9/9b/Luke_Skywalker.png"},
             new CardsPersonaje(){Id = 2, PersonajeId = 2, poder = 95, HabilidadEspecial = "Control de la Fuerza", NivelDePeligrosidad = 9, ImegenURL = "https://upload.wikimedia.org/wikipedia/en/7/76/Darth_Vader.jpg"},
@@ -14,6 +14,6 @@ namespace CatalogoGalactico.Data
             new CardsPersonaje(){Id = 6, PersonajeId = 6, poder = 85, HabilidadEspecial = "Mano del Gobernante", NivelDePeligrosidad = 8, ImegenURL = "Sin Imagen"},
         };
 
-        public static int SiguienteIDCards => CardsPersonajes.Count > 0 ? CardsPersonajes.Max(c => c.Id) + 1 : 1;
+        public static int SiguienteIDCards => cardsPersonajes.Count > 0 ? cardsPersonajes.Max(c => c.Id) + 1 : 1;
     }
 }
