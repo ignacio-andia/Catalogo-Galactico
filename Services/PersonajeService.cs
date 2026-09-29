@@ -4,7 +4,7 @@ using static CatalogoGalactico.Models.Personaje;
 
 namespace CatalogoGalactico.Services
 {
-    public class PersonajeSerevice
+    public class PersonajeService
     {
         public List<Personaje> MostrarTodos() // get
         {
