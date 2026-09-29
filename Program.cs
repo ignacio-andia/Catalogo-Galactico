@@ -11,6 +11,8 @@ builder.Services.AddScoped<EventoService>();
 var app = builder.Build();
 
 app.MapPersonajeEndpoints();
+app.MapEventoEndpoints();
+app.MapCardPersonajeEndpoints();
 
 app.Run();
 
