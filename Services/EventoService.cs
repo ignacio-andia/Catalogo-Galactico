@@ -24,6 +24,15 @@ namespace CatalogoGalactico.Services
         //post 
         public Evento Crear(CrearEventoDTO DTO)
         {
+            foreach (var participanteId in DTO.Participantes)
+            {
+                var existe = PersonajesStore.Personajes.Any(p => p.Id == participanteId);
+                if (!existe)
+                {
+                    throw new ArgumentException($" no Exite el participante con Id {participanteId}");
+                }
+            }
+
             var Nuevo = new Evento
             {
                 Id = EventosStore.SiguienteIDEvento,
@@ -46,6 +55,15 @@ namespace CatalogoGalactico.Services
             if (evento is null)
             {
                 return evento;
+            }
+
+            foreach (var participanteId in DTO.Participantes)
+            {
+                var existe = PersonajesStore.Personajes.Any(p => p.Id == participanteId);
+                if (!existe)
+                {
+                    throw new ArgumentException($" no Exite el participante con Id {participanteId}");
+                }
             }
 
             evento.Nombre = DTO.Nombre;

@@ -1,5 +1,6 @@
 ﻿using CatalogoGalactico.Data;
 using CatalogoGalactico.Models;
+using System.Data;
 using static CatalogoGalactico.Models.CardsPersonaje;
 
 namespace CatalogoGalactico.Services
@@ -22,6 +23,18 @@ namespace CatalogoGalactico.Services
         // post 
         public CardsPersonaje Crear(CrearCardsPersonajeDTO DTO)
         {
+            var personajeExiste = PersonajesStore.Personajes.Any(p => p.Id == DTO.PersonajeId); 
+            if (!personajeExiste)
+            {
+                throw new ArgumentException("El personaje indicado no existe");
+            }
+
+            var YaTieneCard = CardsPersonajesStore.cardsPersonajes.Any(c => c.Id == DTO.PersonajeId);
+            if (YaTieneCard)
+            {
+                throw new ArgumentException("El personaje ya tiene Card Asociada");
+            }
+
             var Nuevo = new CardsPersonaje
             {
                 Id = CardsPersonajesStore.SiguienteIDCards,
