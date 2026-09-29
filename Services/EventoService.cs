@@ -75,5 +75,57 @@ namespace CatalogoGalactico.Services
 
             return evento;
         }
+
+        public List<Evento> ObtenerEventosPorPersonaje(int idPersonaje)
+        {
+            var personajeExiste = PersonajesStore.Personajes.Any(p => p.Id == idPersonaje);
+            if (!personajeExiste)
+            {
+                throw new KeyNotFoundException($"No existe Personaje con ID {idPersonaje}");
+            }
+            return EventosStore.Eventos.Where(e => e.Participantes.Contains(idPersonaje)).ToList();
+        }
+
+        public Personaje? ObtenerMVP(int idEvento)
+        {
+            var evento = ObtenerPordId(idEvento);
+            if (evento is null)
+            { 
+                return null;
+            }
+
+            foreach (var participanteId in evento.Participantes) // revisar que todos los personajes tengan card
+            {
+                var tieneCard = CardsPersonajesStore.cardsPersonajes
+                    .Any(c => c.PersonajeId == participanteId);
+
+                if (!tieneCard)
+                {
+                    throw new ArgumentException(
+                        $"El personaje con Id {participanteId} no tiene Card.");
+                }
+            }
+
+            var mvp = evento.Participantes
+            .Join(
+            CardsPersonajesStore.cardsPersonajes,
+            participanteId => participanteId,
+            card => card.PersonajeId,
+            (participanteId, card) => new
+            {
+                PersonajeId = participanteId,
+                Poder = card.poder
+            }
+            ).OrderByDescending(x => x.Poder).FirstOrDefault();
+
+            if (mvp is null)
+            {
+                return null;
+            }
+
+            return PersonajesStore.Personajes.First(p => p.Id == mvp.PersonajeId);
+        }
+
+
     }
 }

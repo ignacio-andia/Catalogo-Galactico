@@ -63,5 +63,38 @@ namespace CatalogoGalactico.Services
             PersonajesStore.Personajes.Remove(personaje);
             return true;
         }
+
+        public List<Personaje> RankingPorPoder()
+        {
+            return PersonajesStore.Personajes.Join(
+                CardsPersonajesStore.cardsPersonajes,
+                personaje => personaje.Id,
+                card => card.PersonajeId,
+                (personaje, card) => new
+                {
+                    Personaje = personaje,
+                    Poder = card.poder
+                }
+                ).OrderByDescending(x => x.Poder).Select(x => x.Personaje).ToList();
+        }
+
+
+        public List<Personaje> Filtrar(Faccion? faccion, bool? fuerzaSensitivo)
+        {
+            var personajes = PersonajesStore.Personajes.AsEnumerable();
+
+            if (faccion.HasValue)
+            {
+                personajes = personajes.Where(p => p.Faccion == faccion.Value);
+            }
+
+            if (fuerzaSensitivo.HasValue)
+            {
+                personajes = personajes.Where(p => p.FuerzaSensitiva == fuerzaSensitivo.Value);
+            }
+
+            return personajes.ToList();
+        }
+
     }
 }
