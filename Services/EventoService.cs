@@ -127,5 +127,140 @@ namespace CatalogoGalactico.Services
         }
 
 
+        private double GenerarFactorAleatorio()
+        {
+            return Random.Shared.NextDouble() * (1.10 - 0.90) + 0.90;
+        }
+
+        public object Simular(int idEvento)
+        {
+            //Buscar el evento
+            var evento = ObtenerPordId(idEvento);
+
+            if (evento is null)
+            {
+                throw new KeyNotFoundException(
+                    $"No existe Evento con Id {idEvento}");
+            }
+
+
+            //Verificar que tenga participantes
+            if (evento.Participantes.Count == 0)
+            {
+                throw new ArgumentException("El evento no tiene participantes.");
+            }
+
+
+            //Obtener los personajes participantes
+            var personajes = PersonajesStore.Personajes
+                .Where(p => evento.Participantes.Contains(p.Id))
+                .ToList();
+
+
+            //Verificar que todos tengan Card
+            foreach (var personaje in personajes)
+            {
+                var tieneCard = CardsPersonajesStore.cardsPersonajes
+                    .Any(c => c.PersonajeId == personaje.Id);
+
+                if (!tieneCard)
+                {
+                    throw new ArgumentException(
+                        $"El personaje con Id {personaje.Id} no tiene Card.");
+                }
+            }
+
+
+            //Obtener las Cards de los participantes
+            var participantesConCard = personajes
+                .Join(
+                    CardsPersonajesStore.cardsPersonajes,
+                    personaje => personaje.Id,
+                    card => card.PersonajeId,
+                    (personaje, card) => new
+                    {
+                        Personaje = personaje,
+                        Card = card
+                    }
+                ).ToList();
+
+
+            //Calcular poder base por faccion
+            double poderRebelde = participantesConCard
+                .Where(x => x.Personaje.Faccion == Faccion.Rebelde)
+                .Sum(x => x.Card.poder);
+
+            double poderImperio = participantesConCard
+                .Where(x => x.Personaje.Faccion == Faccion.Imperio)
+                .Sum(x => x.Card.poder);
+
+            double poderNeutral = participantesConCard
+                .Where(x => x.Personaje.Faccion == Faccion.Neutral)
+                .Sum(x => x.Card.poder);
+
+
+            //generar factores aleatorios
+            double factorRebelde = GenerarFactorAleatorio();
+            double factorImperio = GenerarFactorAleatorio();
+            double factorNeutral = GenerarFactorAleatorio();
+
+
+            //aplicar los factores
+            double poderFinalRebelde = poderRebelde * factorRebelde;
+            double poderFinalImperio = poderImperio * factorImperio;
+            double poderFinalNeutral = poderNeutral * factorNeutral;
+
+
+            //determinar ganador
+            var poderesFinales = new Dictionary<Faccion, double>
+            {
+                { Faccion.Rebelde, poderFinalRebelde },
+                { Faccion.Imperio, poderFinalImperio },
+                { Faccion.Neutral, poderFinalNeutral }
+            };
+
+            var ganador = poderesFinales
+                .OrderByDescending(x => x.Value)
+                .First();
+
+
+            //Guardar resultado en el evento
+            evento.Resultado = $"Victoria de {ganador.Key}";
+
+
+            //Devolver información de la simulación
+            return new
+            {
+                eventoId = evento.Id,
+
+                poderBase = new
+                {
+                    rebelde = poderRebelde,
+                    imperio = poderImperio,
+                    neutral = poderNeutral
+                },
+
+                factores = new
+                {
+                    rebelde = factorRebelde,
+                    imperio = factorImperio,
+                    neutral = factorNeutral
+                },
+
+                poderFinal = new
+                {
+                    rebelde = poderFinalRebelde,
+                    imperio = poderFinalImperio,
+                    neutral = poderFinalNeutral
+                },
+
+                ganador = ganador.Key.ToString(),
+
+                criterio = "Gana la facción con mayor poder final después de aplicar el factor aleatorio."
+            };
+        }
+
+
+
     }
 }

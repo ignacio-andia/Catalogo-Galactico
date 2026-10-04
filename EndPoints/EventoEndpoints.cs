@@ -108,6 +108,35 @@ namespace CatalogoGalactico.EndPoints
                     });
                 }
             });
+
+
+            // POST /eventos/{id}/simular
+            app.MapPost("/eventos/{id}/simular", (int id, EventoService service) =>
+            {
+                try
+                {
+                    var resultado = service.Simular(id);
+                    return Results.Ok(resultado);
+                }
+                catch (KeyNotFoundException ex)
+                {
+                    return Results.NotFound(new
+                    {
+                        error = ex.Message
+                    });
+                }
+                catch (ArgumentException ex)
+                {
+                    return Results.BadRequest(new
+                    {
+                        error = ex.Message
+                    });
+                }
+            });
+
+
+
+
         }
 
 
