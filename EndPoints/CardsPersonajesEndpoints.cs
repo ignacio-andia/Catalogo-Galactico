@@ -56,15 +56,27 @@ namespace CatalogoGalactico.EndPoints
             // PUT /cartas/{id}
             app.MapPut("/cartas/{id}", (int id, CrearCardsPersonajeDTO DTO, CardPersonajeService service) =>
             {
-                var card = service.Modificar(id, DTO);
-                if (card is null)
+                try
                 {
-                    return Results.NotFound(new
+                    var card = service.Modificar(id, DTO);
+
+                    if (card is null)
                     {
-                        error = $"No existe Card con Id {id}"
+                        return Results.NotFound(new
+                        {
+                            error = $"No existe Card con Id {id}"
+                        });
+                    }
+
+                    return Results.Ok(card);
+                }
+                catch (ArgumentException ex)
+                {
+                    return Results.BadRequest(new
+                    {
+                        error = ex.Message
                     });
                 }
-                return Results.Ok(card);
             });
         }
     }

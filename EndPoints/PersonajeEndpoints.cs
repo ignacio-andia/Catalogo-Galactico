@@ -45,26 +45,51 @@ namespace CatalogoGalactico.EndPoints
 
             app.MapPut("/personajes/{id}", (int id, CrearPersonajeDTO DTO, PersonajeService service) =>
             {
-                var personaje = service.Modificar(id, DTO);
-
-                if(personaje is null)
+                try
                 {
-                    return Results.NotFound();
-                }
+                    var personaje = service.Modificar(id, DTO);
 
-                return Results.Ok(personaje);
+                    if (personaje is null)
+                    {
+                        return Results.NotFound(new
+                        {
+                            error = $"No existe Personaje con Id {id}"
+                        });
+                    }
+
+                    return Results.Ok(personaje);
+                }
+                catch (ArgumentException ex)
+                {
+                    return Results.BadRequest(new
+                    {
+                        error = ex.Message
+                    });
+                }
             });
 
-            app.MapDelete("/personajes/{id}", (int id, PersonajeService service)=>
+            app.MapDelete("/personajes/{id}", (int id, PersonajeService service) =>
             {
-                bool eliminado = service.Eliminar(id);
-                if (eliminado)
+                try
                 {
+                    bool eliminado = service.Eliminar(id);
+
+                    if (!eliminado)
+                    {
+                        return Results.NotFound(new
+                        {
+                            error = $"No existe Personaje con Id {id}"
+                        });
+                    }
+
                     return Results.NoContent();
                 }
-                else
+                catch (ArgumentException ex)
                 {
-                    return Results.NotFound();
+                    return Results.BadRequest(new
+                    {
+                        error = ex.Message
+                    });
                 }
             });
 
@@ -84,7 +109,7 @@ namespace CatalogoGalactico.EndPoints
 
             });
 
-            app.MapGet("personsajes/{id}/eventos", (int id, EventoService service) =>
+            app.MapGet("/personajes/{id}/eventos", (int id, EventoService service) =>
             {
                 try
                 {

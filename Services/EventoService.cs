@@ -26,10 +26,18 @@ namespace CatalogoGalactico.Services
         {
             foreach (var participanteId in DTO.Participantes)
             {
-                var existe = PersonajesStore.Personajes.Any(p => p.Id == participanteId);
-                if (!existe)
+                var personaje = PersonajesStore.Personajes.FirstOrDefault(p => p.Id == participanteId);
+
+                if (personaje is null)
                 {
-                    throw new ArgumentException($" no Exite el participante con Id {participanteId}");
+                    throw new ArgumentException(
+                        $"No existe el participante con Id {participanteId}");
+                }
+
+                if (personaje.Estado == EstadoPersonaje.Muerto)
+                {
+                    throw new ArgumentException(
+                        $"El personaje con Id {participanteId} está muerto y no puede participar en nuevos eventos.");
                 }
             }
 
@@ -59,10 +67,18 @@ namespace CatalogoGalactico.Services
 
             foreach (var participanteId in DTO.Participantes)
             {
-                var existe = PersonajesStore.Personajes.Any(p => p.Id == participanteId);
-                if (!existe)
+                var personaje = PersonajesStore.Personajes.FirstOrDefault(p => p.Id == participanteId);
+
+                if (personaje is null)
                 {
-                    throw new ArgumentException($" no Exite el participante con Id {participanteId}");
+                    throw new ArgumentException(
+                        $"No existe el participante con Id {participanteId}");
+                }
+
+                if (personaje.Estado == EstadoPersonaje.Muerto)
+                {
+                    throw new ArgumentException(
+                        $"El personaje con Id {participanteId} está muerto y no puede participar en nuevos eventos.");
                 }
             }
 
@@ -89,12 +105,26 @@ namespace CatalogoGalactico.Services
         public Personaje? ObtenerMVP(int idEvento)
         {
             var evento = ObtenerPordId(idEvento);
+
             if (evento is null)
-            { 
+            {
                 return null;
             }
 
-            foreach (var participanteId in evento.Participantes) // revisar que todos los personajes tengan card
+            // Verificar que el evento ya haya sido simulado
+            if (string.IsNullOrEmpty(evento.Resultado))
+            {
+                throw new ArgumentException(
+                    "El evento todavía no ha sido simulado y no tiene MVP.");
+            }
+
+            // Obtener los personajes participantes
+            var personajes = PersonajesStore.Personajes
+                .Where(p => evento.Participantes.Contains(p.Id))
+                .ToList();
+
+            // Verificar que todos los participantes tengan Card
+            foreach (var participanteId in evento.Participantes)
             {
                 var tieneCard = CardsPersonajesStore.cardsPersonajes
                     .Any(c => c.PersonajeId == participanteId);
@@ -106,24 +136,51 @@ namespace CatalogoGalactico.Services
                 }
             }
 
-            var mvp = evento.Participantes
-            .Join(
-            CardsPersonajesStore.cardsPersonajes,
-            participanteId => participanteId,
-            card => card.PersonajeId,
-            (participanteId, card) => new
+            // Obtener los participantes vivos que pertenecen
+            // a Rebelde o Imperio.
+            var participantesVivos = personajes
+                .Where(p =>
+                    p.Estado == EstadoPersonaje.Vivo &&
+                    p.Faccion != Faccion.Neutral)
+                .ToList();
+
+            if (participantesVivos.Count == 0)
             {
-                PersonajeId = participanteId,
-                Poder = card.poder
+                return null;
             }
-            ).OrderByDescending(x => x.Poder).FirstOrDefault();
+
+            // Determinar la facción ganadora.
+            // Después de la simulación, los personajes de la
+            // facción perdedora están muertos.
+            var faccionGanadora = participantesVivos
+                .GroupBy(p => p.Faccion)
+                .OrderByDescending(g => g.Count())
+                .First()
+                .Key;
+
+            // Buscar el personaje vivo con mayor poder
+            // dentro de la facción ganadora.
+            var mvp = participantesVivos
+                .Where(p => p.Faccion == faccionGanadora)
+                .Join(
+                    CardsPersonajesStore.cardsPersonajes,
+                    personaje => personaje.Id,
+                    card => card.PersonajeId,
+                    (personaje, card) => new
+                    {
+                        Personaje = personaje,
+                        Poder = card.poder
+                    }
+                )
+                .OrderByDescending(x => x.Poder)
+                .FirstOrDefault();
 
             if (mvp is null)
             {
                 return null;
             }
 
-            return PersonajesStore.Personajes.First(p => p.Id == mvp.PersonajeId);
+            return mvp.Personaje;
         }
 
 

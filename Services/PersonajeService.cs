@@ -41,6 +41,13 @@ namespace CatalogoGalactico.Services
             {
                 return personaje;
             }
+
+            if (personaje.Estado == EstadoPersonaje.Muerto && DTO.Estado != EstadoPersonaje.Muerto)
+            {
+                throw new ArgumentException(
+                    "Un personaje muerto no puede cambiar su estado.");
+            }
+
             personaje.Nombre = DTO.Nombre;
             personaje.Especie = DTO.Especie;
             personaje.Faccion = DTO.Faccion;
@@ -53,14 +60,38 @@ namespace CatalogoGalactico.Services
         }
 
 
-        public bool Eliminar(int id) //Delete
+        public bool Eliminar(int id) // delete
         {
             var personaje = obtenerPorID(id);
+
             if (personaje is null)
             {
                 return false;
             }
+
+            // Verificar si el personaje participa en algún evento
+            var estaEnEvento = EventosStore.Eventos
+                .Any(e => e.Participantes.Contains(id));
+
+            if (estaEnEvento)
+            {
+                throw new ArgumentException(
+                    $"El personaje con Id {id} no puede eliminarse porque está registrado en un evento.");
+            }
+
+            // Verificar si el personaje tiene una Card asociada
+            var tieneCard = CardsPersonajesStore.cardsPersonajes
+                .Any(c => c.PersonajeId == id);
+
+            if (tieneCard)
+            {
+                throw new ArgumentException(
+                    $"El personaje con Id {id} no puede eliminarse porque tiene una Card asociada.");
+            }
+
+            // Si no participa en eventos y no tiene Card, se elimina
             PersonajesStore.Personajes.Remove(personaje);
+
             return true;
         }
 

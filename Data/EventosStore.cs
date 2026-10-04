@@ -26,6 +26,36 @@ namespace CatalogoGalactico.Data
                 Descripcion = "La Batalla de Hoth fue un enfrentamiento militar entre el Imperio Galáctico y la Alianza Rebelde durante la Guerra Civil Galáctica. La batalla tuvo lugar en el planeta helado de Hoth, donde la Alianza Rebelde había establecido una base secreta.",
                 Participantes = new List<int> { 4, 5, 6 },
                 Resultado = ""
+            },
+            new Evento
+            {
+                Id = 3,
+                Nombre = "Enfrentamiento en Tatooine",
+                fecha = 5,
+                Ubicacion = "Tatooine",
+                Descripcion = "Un enfrentamiento entre fuerzas rebeldes e imperiales en el planeta Tatooine, con la participación de un personaje neutral.",
+                Participantes = new List<int> { 7, 8, 9 },
+                Resultado = ""
+            },
+            new Evento
+            {
+                Id = 4,
+                Nombre = "Incidente en Endor",
+                fecha = 7,
+                Ubicacion = "Endor",
+                Descripcion = "Un nuevo enfrentamiento entre la Alianza Rebelde y el Imperio Galáctico en las cercanías de Endor.",
+                Participantes = new List<int> { 1, 6, 8 },
+                Resultado = ""
+            },
+            new Evento
+            {
+                Id = 5,
+                Nombre = "Operación de la Rebelión",
+                fecha = 9,
+                Ubicacion = "Naboo",
+                Descripcion = "Una operación de la Alianza Rebelde que reúne a varios de sus miembros para enfrentarse a fuerzas imperiales.",
+                Participantes = new List<int> { 3, 5, 7 },
+                Resultado = ""
             }
         };
 
