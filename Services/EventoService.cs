@@ -132,9 +132,11 @@ namespace CatalogoGalactico.Services
             return Random.Shared.NextDouble() * (1.10 - 0.90) + 0.90;
         }
 
+
+        //--------------------------------------------------------
         public object Simular(int idEvento)
         {
-            //Buscar el evento
+            // Buscar el evento
             var evento = ObtenerPordId(idEvento);
 
             if (evento is null)
@@ -144,20 +146,30 @@ namespace CatalogoGalactico.Services
             }
 
 
-            //Verificar que tenga participantes
+            // Verificar que tenga participantes
             if (evento.Participantes.Count == 0)
             {
-                throw new ArgumentException("El evento no tiene participantes.");
+                throw new ArgumentException(
+                    "El evento no tiene participantes.");
             }
 
 
-            //Obtener los personajes participantes
+            // Obtener los personajes participantes
             var personajes = PersonajesStore.Personajes
                 .Where(p => evento.Participantes.Contains(p.Id))
                 .ToList();
 
 
-            //Verificar que todos tengan Card
+            // Verificar que exista al menos un Rebelde y un Imperial
+            if (!personajes.Any(p => p.Faccion == Faccion.Rebelde) ||
+                !personajes.Any(p => p.Faccion == Faccion.Imperio))
+            {
+                throw new ArgumentException(
+                    "El evento debe tener al menos un participante Rebelde y uno Imperial.");
+            }
+
+
+            // Verificar que todos tengan Card
             foreach (var personaje in personajes)
             {
                 var tieneCard = CardsPersonajesStore.cardsPersonajes
@@ -171,7 +183,7 @@ namespace CatalogoGalactico.Services
             }
 
 
-            //Obtener las Cards de los participantes
+            // Obtener las Cards de los participantes
             var participantesConCard = personajes
                 .Join(
                     CardsPersonajesStore.cardsPersonajes,
@@ -182,10 +194,12 @@ namespace CatalogoGalactico.Services
                         Personaje = personaje,
                         Card = card
                     }
-                ).ToList();
+                )
+                .ToList();
 
 
-            //Calcular poder base por faccion
+            // Calcular poder base por facción
+            // Los neutrales NO participan en la batalla
             double poderRebelde = participantesConCard
                 .Where(x => x.Personaje.Faccion == Faccion.Rebelde)
                 .Sum(x => x.Card.poder);
@@ -194,41 +208,47 @@ namespace CatalogoGalactico.Services
                 .Where(x => x.Personaje.Faccion == Faccion.Imperio)
                 .Sum(x => x.Card.poder);
 
-            double poderNeutral = participantesConCard
-                .Where(x => x.Personaje.Faccion == Faccion.Neutral)
-                .Sum(x => x.Card.poder);
 
-
-            //generar factores aleatorios
+            // Generar factores aleatorios
             double factorRebelde = GenerarFactorAleatorio();
             double factorImperio = GenerarFactorAleatorio();
-            double factorNeutral = GenerarFactorAleatorio();
 
 
-            //aplicar los factores
+            // Aplicar los factores
             double poderFinalRebelde = poderRebelde * factorRebelde;
             double poderFinalImperio = poderImperio * factorImperio;
-            double poderFinalNeutral = poderNeutral * factorNeutral;
 
 
-            //determinar ganador
+            // Determinar ganador
             var poderesFinales = new Dictionary<Faccion, double>
-            {
-                { Faccion.Rebelde, poderFinalRebelde },
-                { Faccion.Imperio, poderFinalImperio },
-                { Faccion.Neutral, poderFinalNeutral }
-            };
+    {
+        { Faccion.Rebelde, poderFinalRebelde },
+        { Faccion.Imperio, poderFinalImperio }
+    };
 
             var ganador = poderesFinales
                 .OrderByDescending(x => x.Value)
                 .First();
 
 
-            //Guardar resultado en el evento
+            // Marcar como muertos a los participantes
+            // de la facción perdedora.
+            // Los neutrales nunca mueren por la simulación.
+            foreach (var personaje in personajes)
+            {
+                if (personaje.Faccion != ganador.Key &&
+                    personaje.Faccion != Faccion.Neutral)
+                {
+                    personaje.Estado = EstadoPersonaje.Muerto;
+                }
+            }
+
+
+            // Guardar resultado en el evento
             evento.Resultado = $"Victoria de {ganador.Key}";
 
 
-            //Devolver información de la simulación
+            // Devolver información de la simulación
             return new
             {
                 eventoId = evento.Id,
@@ -236,27 +256,24 @@ namespace CatalogoGalactico.Services
                 poderBase = new
                 {
                     rebelde = poderRebelde,
-                    imperio = poderImperio,
-                    neutral = poderNeutral
+                    imperio = poderImperio
                 },
 
                 factores = new
                 {
                     rebelde = factorRebelde,
-                    imperio = factorImperio,
-                    neutral = factorNeutral
+                    imperio = factorImperio
                 },
 
                 poderFinal = new
                 {
                     rebelde = poderFinalRebelde,
-                    imperio = poderFinalImperio,
-                    neutral = poderFinalNeutral
+                    imperio = poderFinalImperio
                 },
 
                 ganador = ganador.Key.ToString(),
 
-                criterio = "Gana la facción con mayor poder final después de aplicar el factor aleatorio."
+                criterio = "Gana la facción con mayor poder final después de aplicar el factor aleatorio. Los participantes de la facción perdedora mueren; los neutrales no participan en el combate."
             };
         }
 
