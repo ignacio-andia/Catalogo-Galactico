@@ -9,11 +9,16 @@ namespace CatalogoGalactico.EndPoints
     {
         public static void MapPersonajeEndpoints(this WebApplication app)
         {
-            app.MapGet("/personajes", (PersonajeService service) =>
+            app.MapGet("/personajes", (Faccion? faccion, bool? fuerzaSensitivo, PersonajeService service) =>
             {
-                var personajes = service.MostrarTodos();
+                if (!faccion.HasValue && !fuerzaSensitivo.HasValue)
+                {
+                    var personajes = service.MostrarTodos();
+                    return Results.Ok(personajes);
+                }
 
-                return Results.Ok(personajes);
+                var personajesFiltrados = service.Filtrar(faccion, fuerzaSensitivo);
+                return Results.Ok(personajesFiltrados);
             });
 
             app.MapGet("/personajes/{id}", (int id, PersonajeService service) =>
