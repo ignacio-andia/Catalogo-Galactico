@@ -79,6 +79,21 @@ namespace CatalogoGalactico.EndPoints
                     .Produces(StatusCodes.Status404NotFound);
 
 
+            app.MapGet("/personajes/{id}/con-card", (int id, PersonajeService service) =>
+            {
+                var personaje = service.ObtenerPersonajeConcard(id);
+                if (personaje is null)
+                {
+                    return Results.NotFound(new
+                    {
+                        error = $"no existe Personaje con Id {id}"
+                    });
+                }
+
+                return Results.Ok(personaje);
+            }
+            );
+
 
             app.MapPost("/personajes", (CrearPersonajeDTO DTO, PersonajeService service) =>
             {
