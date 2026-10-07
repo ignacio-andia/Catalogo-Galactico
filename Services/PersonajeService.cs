@@ -17,6 +17,26 @@ namespace CatalogoGalactico.Services
             return personaje;
         }
 
+
+        //GET /personajes/{id}/con-card
+
+        public Personaje? ObtenerPersonajeConcard(int id)
+        {
+            var personajes = PersonajesStore.Personajes;
+
+            var personaje = personajes
+                .Join(
+                    CardsPersonajesStore.cardsPersonajes,
+                    personaje => personaje.Id,
+                    card => card.PersonajeId,
+                    (personaje, card) => personaje
+                )
+                .FirstOrDefault(personaje => personaje.Id == id);
+
+            return personaje;
+        }
+
+
         public Personaje Crear(CrearPersonajeDTO DTO) //post
         {
             var Nuevo = new Personaje

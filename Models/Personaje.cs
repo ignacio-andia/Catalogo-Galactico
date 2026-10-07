@@ -25,6 +25,7 @@ namespace CatalogoGalactico.Models
         public bool FuerzaSensitiva { get; set; }
 
         [Description("Datos necesarios para crear un nuevo personaje.")]
+        public string foto { get; set; } = string.Empty;  
 
 
 

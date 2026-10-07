@@ -6,7 +6,7 @@ namespace CatalogoGalactico.Data
     {
         public static List<CardsPersonaje> cardsPersonajes { get; } = new List<CardsPersonaje>()
         {
-            new CardsPersonaje(){Id = 1,PersonajeId = 1,poder = 90,HabilidadEspecial = "Control de la Fuerza",Arma = "Espada laser",NivelDePeligrosidad = 8,ImegenURL = "https://upload.wikimedia.org/wikipedia/en/9/9b/Luke_Skywalker.png"},
+            new CardsPersonaje(){Id = 1,PersonajeId = 1,poder = 90,HabilidadEspecial = "Control de la Fuerza",Arma = "Espada laser",NivelDePeligrosidad = 8,ImegenURL = "https://static.wikia.nocookie.net/esstarwars/images/6/6f/Anakin_Skywalker_RotS.png/revision/latest?cb=20160226204939"},
             new CardsPersonaje(){Id = 2,PersonajeId = 2,poder = 95,HabilidadEspecial = "Control de la Fuerza",Arma = "Espada laser",NivelDePeligrosidad = 9,ImegenURL = "https://upload.wikimedia.org/wikipedia/en/7/7b/Darth_Vader.jpg"},
             new CardsPersonaje(){Id = 3,PersonajeId = 3,poder = 85,HabilidadEspecial = "Control de la Fuerza",Arma = "Espada laser",NivelDePeligrosidad = 7,ImegenURL = "https://upload.wikimedia.org/wikipedia/en/8/87/Leia_Organa.png"},
             new CardsPersonaje(){Id = 4,PersonajeId = 4,poder = 80,HabilidadEspecial = "Estocada Relampago",Arma = "Espada laser",NivelDePeligrosidad = 7,ImegenURL = "sin imagen"},
